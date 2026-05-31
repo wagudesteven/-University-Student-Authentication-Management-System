@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-9ir(fa%&e&rqz(i3qy(4-r$rf0bym5_+5w^ws45(owq$#nsv2z
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "192.168.180.80",
+]
 
 
 # Application definition
@@ -37,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    "rest_framework_simplejwt",
 
     "rest_framework",
     "corsheaders",
@@ -129,6 +135,7 @@ STATIC_URL = 'static/'
 
 
 CORS_ALLOWED_ORIGINS = [
+    "http://192.168.180.80:3000",
     "http://localhost:3000",
 ]
 

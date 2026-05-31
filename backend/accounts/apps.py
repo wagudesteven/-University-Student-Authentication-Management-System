@@ -1,6 +1,4 @@
 from django.apps import AppConfig
-
-
 class AccountsConfig(
     AppConfig
 ):
@@ -10,4 +8,5 @@ class AccountsConfig(
 
     name = "accounts"
 
-   
+def ready(self):
+    import accounts.signals

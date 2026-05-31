@@ -1,8 +1,15 @@
-import NextAuth, { AuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
+import NextAuth, {
+  type NextAuthOptions,
+} from "next-auth";
 
-export const authOptions: AuthOptions = {
+import CredentialsProvider
+from "next-auth/providers/credentials";
+
+export const authOptions:
+NextAuthOptions = {
+
   providers: [
+
     CredentialsProvider({
       name: "Credentials",
 
@@ -18,77 +25,150 @@ export const authOptions: AuthOptions = {
         },
       },
 
-      async authorize(credentials) {
-        if (!credentials) {
-          return null;
-        }
+      async authorize(
+        credentials
+      ) {
 
-        try {
-          const response = await fetch(
-            "http://127.0.0.1:8000/api/auth/login/",
+        const res =
+          await fetch(
+            "http://127.0.0.1:8000/api/token/",
             {
-              method: "POST",
+              method:
+                "POST",
 
               headers: {
-                "Content-Type": "application/json",
+                "Content-Type":
+                  "application/json",
               },
 
-              body: JSON.stringify({
-                username: credentials.username,
-                password: credentials.password,
-              }),
+              body:
+                JSON.stringify({
+                  username:
+                    credentials?.username,
+
+                  password:
+                    credentials?.password,
+                }),
             }
           );
 
-          const data = await response.json();
+        const data =
+          await res.json();
 
-          if (response.ok && data.access) {
-            return {
-              id: credentials.username,
-              name: credentials.username,
-              accessToken: data.access,
-              refreshToken: data.refresh,
-            };
-          }
+        console.log(
+          "DJANGO LOGIN:",
+          data
+        );
 
-          return null;
-        } catch (error) {
-          console.error("Login Error:", error);
+        if (!res.ok) {
           return null;
         }
+
+        return {
+          id:
+            String(
+              data.user_id
+            ),
+
+          username:
+            data.username,
+
+          role:
+            data.role,
+
+          access:
+            data.access,
+
+          refresh:
+            data.refresh,
+        };
       },
     }),
   ],
 
-  pages: {
-    signIn: "/login",
+  session: {
+    strategy:
+      "jwt",
   },
 
-  session: {
-    strategy: "jwt",
-  },
+  secret:
+    process.env
+      .NEXTAUTH_SECRET,
 
   callbacks: {
-    async jwt({ token, user }) {
+
+    async jwt({
+      token,
+      user,
+    }) {
+
       if (user) {
-        token.accessToken = (user as any).accessToken;
-        token.refreshToken = (user as any).refreshToken;
+
+        token.username =
+          (
+            user as any
+          ).username;
+
+        token.role =
+          (
+            user as any
+          ).role;
+
+        token.access =
+          (
+            user as any
+          ).access;
+
+        token.refresh =
+          (
+            user as any
+          ).refresh;
       }
 
       return token;
     },
 
-    async session({ session, token }) {
-      session.accessToken = token.accessToken as string;
-      session.refreshToken = token.refreshToken as string;
+    async session({
+      session,
+      token,
+    }) {
+
+      (
+        session as any
+      ).username =
+        token.username;
+
+      (
+        session as any
+      ).role =
+        token.role;
+
+      (
+        session as any
+      ).access =
+        token.access;
+
+      (
+        session as any
+      ).refresh =
+        token.refresh;
 
       return session;
     },
   },
 
-  secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    signIn:
+      "/login",
+  },
 };
 
-const handler = NextAuth(authOptions);
+const handler =
+  NextAuth(
+    authOptions
+  );
 
-export { handler as GET, handler as POST };
+export {
+  handler as GET,
+  handler as POST,
+};

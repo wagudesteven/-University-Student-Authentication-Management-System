@@ -1,140 +1,198 @@
 from django.contrib.auth.models import User
-
-from rest_framework.decorators import (
-    api_view,
-    permission_classes,
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import permissions
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
 )
-
-from rest_framework.permissions import (
-    IsAuthenticated,
-)
-
-from rest_framework.response import (
-    Response,
-)
-
-from rest_framework import status
-
-from .models import (
-    StudentProfile,
-    Unit,
-    StudentUnit,
-    HostelApplication,
-)
-
-from .serializers import (
-    ProfileSerializer,
-    UnitSerializer,
+from rest_framework_simplejwt.serializers import (
+    TokenObtainPairSerializer,
 )
 
 
-@api_view(["GET"])
-@permission_classes(
-    [IsAuthenticated]
-)
-def profile_view(request):
-    profile = StudentProfile.objects.get(
-        user=request.user
+# =========================
+# JWT TOKEN + ROLE
+# =========================
+class CustomTokenSerializer(
+    TokenObtainPairSerializer
+):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        data["role"] = (
+            "lecturer"
+            if self.user.is_staff
+            else "student"
+        )
+
+        data["username"] = (
+            self.user.username
+        )
+
+        data["user_id"] = (
+            self.user.id
+        )
+
+        return data
+
+
+class CustomTokenView(
+    TokenObtainPairView
+):
+    serializer_class = (
+        CustomTokenSerializer
     )
 
-    serializer = ProfileSerializer(
-        profile
-    )
 
-    return Response(serializer.data)
+# =========================
+# LECTURER REGISTER
+# =========================
+class LecturerRegisterView(
+    APIView
+):
+    permission_classes = [
+        permissions.AllowAny
+    ]
 
+    def post(self, request):
+        username = (
+            request.data.get(
+                "username"
+            )
+        )
 
-@api_view(["POST"])
-@permission_classes(
-    [IsAuthenticated]
-)
-def register_units(request):
-    profile = StudentProfile.objects.get(
-        user=request.user
-    )
+        password = (
+            request.data.get(
+                "password"
+            )
+        )
 
-    if profile.fee_balance > 0:
+        if (
+            not username
+            or not password
+        ):
+            return Response(
+                {
+                    "error":
+                    "username/password required"
+                },
+                status=400,
+            )
+
+        if User.objects.filter(
+            username=username
+        ).exists():
+            return Response(
+                {
+                    "error":
+                    "User exists"
+                },
+                status=400,
+            )
+
+        user = (
+            User.objects.create_user(
+                username=username,
+                password=password,
+            )
+        )
+
+        user.is_staff = True
+        user.save()
+
         return Response(
             {
-                "error":
-                "Fee balance must be cleared"
+                "message":
+                "Lecturer registered successfully"
             },
-            status=400,
+            status=201,
         )
 
-    unit_ids = request.data.get(
-        "units",
-        [],
-    )
 
-    for unit_id in unit_ids:
-        unit = Unit.objects.get(
-            id=unit_id
-        )
+# =========================
+# PROFILE
+# =========================
+class StudentProfileView(
+    APIView
+):
+    permission_classes = [
+        permissions.IsAuthenticated
+    ]
 
-        StudentUnit.objects.create(
-            student=profile,
-            unit=unit,
-            semester=profile.semester,
-        )
-
-    return Response(
-        {
-            "message":
-            "Units registered"
-        }
-    )
-
-
-@api_view(["POST"])
-@permission_classes(
-    [IsAuthenticated]
-)
-def hostel_apply(request):
-    profile = StudentProfile.objects.get(
-        user=request.user
-    )
-
-    if profile.fee_balance > 0:
+    def get(self, request):
         return Response(
             {
-                "error":
-                "Clear fee first"
-            },
-            status=400,
+                "username":
+                request.user.username,
+
+                "role":
+                "lecturer"
+                if request.user.is_staff
+                else "student",
+            }
         )
 
-    hostel = request.data.get(
-        "hostel_name"
-    )
 
-    HostelApplication.objects.create(
-        student=profile,
-        hostel_name=hostel,
-        status="pending",
-    )
+# =========================
+# ADD RESULT
+# =========================
+class AddResultView(
+    APIView
+):
+    permission_classes = [
+        permissions.IsAuthenticated
+    ]
 
-    profile.hostel_status = "pending"
+    def post(self, request):
+        if (
+            not request.user.is_staff
+        ):
+            return Response(
+                {
+                    "error":
+                    "Only lecturers allowed"
+                },
+                status=403,
+            )
 
-    profile.save()
+        return Response(
+            {
+                "message":
+                "Result added successfully",
 
-    return Response(
-        {
-            "message":
-            "Application submitted"
-        }
-    )
+                "data":
+                request.data,
+            }
+        )
 
 
-@api_view(["GET"])
-def units_view(request):
-    units = Unit.objects.all()
+# =========================
+# STUDENT RESULTS
+# =========================
+class StudentResultsView(
+    APIView
+):
+    permission_classes = [
+        permissions.IsAuthenticated
+    ]
 
-    serializer = UnitSerializer(
-        units,
-        many=True,
-    )
+    def get(self, request):
+        return Response(
+            {
+                "results": [
+                    {
+                        "unit":
+                        "Programming 101",
 
-    return Response(
-        serializer.data
-    )
+                        "cat":
+                        30,
+
+                        "exam":
+                        65,
+
+                        "grade":
+                        "B+",
+                    }
+                ]
+            }
+        )

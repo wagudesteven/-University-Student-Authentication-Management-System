@@ -1,45 +1,37 @@
 from django.urls import path
 
 from .views import (
-    profile_view,
-    register_units,
-    hostel_apply,
-    units_view,
-)
-
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
+    CustomTokenView,
+    LecturerRegisterView,
+    StudentProfileView,
+    AddResultView,
+    StudentResultsView,
 )
 
 urlpatterns = [
     path(
-        "login/",
-        TokenObtainPairView.as_view(),
+        "token/",
+        CustomTokenView.as_view(),
+        name="token",
     ),
 
     path(
-        "refresh/",
-        TokenRefreshView.as_view(),
+        "lecturer/register/",
+        LecturerRegisterView.as_view(),
     ),
 
     path(
-        "profile/",
-        profile_view,
+        "student/profile/",
+        StudentProfileView.as_view(),
     ),
 
     path(
-        "units/",
-        units_view,
+        "lecturer/add-result/",
+        AddResultView.as_view(),
     ),
 
     path(
-        "register-units/",
-        register_units,
-    ),
-
-    path(
-        "hostel-apply/",
-        hostel_apply,
+        "student/results/",
+        StudentResultsView.as_view(),
     ),
 ]
