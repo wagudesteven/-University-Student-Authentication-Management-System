@@ -5,7 +5,7 @@ import {
 } from "react";
 
 import {
-  api,
+ api,
 } from "@/lib/api";
 
 import ProtectedRoute

@@ -31,7 +31,7 @@ NextAuthOptions = {
 
         const res =
           await fetch(
-            "http://127.0.0.1:8000/api/token/",
+            "https://django-backend-production-5bc6.up.railway.app/api/token/",
             {
               method:
                 "POST",

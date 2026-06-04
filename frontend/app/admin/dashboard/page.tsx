@@ -48,7 +48,7 @@ export default function AdminDashboard() {
         </p>
 
         <a
-          href="http://127.0.0.1:8000/admin/"
+          href="https://django-backend-production-5bc6.up.railway.app/admin/"
           target="_blank"
           rel="noopener noreferrer"
           className="
