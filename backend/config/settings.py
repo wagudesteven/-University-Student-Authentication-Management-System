@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-9ir(fa%&e&rqz(i3qy(4-r$rf0bym5_+5w^ws45(owq$#nsv2z
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    "django-backend-production-5bc6.up.railway.app",
+    "localhost",
+    "127.0.0.1",
+]
 
 
 # Application definition
@@ -132,8 +136,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 CORS_ALLOWED_ORIGINS = [
-    "http://192.168.180.80:3000",
-    "http://localhost:3000",
+    "https://university-student-authentication-m.vercel.app/",
 ]
 
 REST_FRAMEWORK = {
@@ -141,3 +144,8 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://django-backend-production-5bc6.up.railway.app",
+    "https://your-app.vercel.app",
+]
