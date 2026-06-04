@@ -136,7 +136,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 CORS_ALLOWED_ORIGINS = [
-    "https://university-student-authentication-m.vercel.app/",
+    "https://university-student-authentication-m.vercel.app",
 ]
 
 REST_FRAMEWORK = {
